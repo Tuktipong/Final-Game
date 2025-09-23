@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 RETRO QUIZ CHALLENGE '80s</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(45deg, #0f0f23, #1a1a2e, #16213e);
+            color: #00ff41;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Retro Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 65, 0.03) 2px,
+                    rgba(0, 255, 65, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border: 3px solid #ff0080;
+            border-radius: 15px;
+            background: rgba(255, 0, 128, 0.1);
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
+        }
+        
+        .game-title {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 900;
+            color: #ff0080;
+            text-shadow: 0 0 20px #ff0080;
+            margin-bottom: 10px;
+            animation: neonPulse 2s infinite alternate;
+        }
+        
+        @keyframes neonPulse {
+            from { text-shadow: 0 0 20px #ff0080, 0 0 30px #ff0080; }
+            to { text-shadow: 0 0 30px #ff0080, 0 0 40px #ff0080, 0 0 50px #ff0080; }
+        }
+        
+        .subtitle {
+            font-size: clamp(0.8rem, 2vw, 1.2rem);
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #00ff41;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .stat-item {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-weight: bold;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        /* Lives styles */
+        .lives-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .life-icon {
+            font-size: 1.5em; /* Make hearts/skulls slightly larger */
+            line-height: 1; /* Adjust line height for better alignment of icons */
+        }
+        
+        .question-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+        }
+        
+        .question-header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: #00ffff;
+        }
+        
+        .question-text {
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            color: #ffffff;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .options-container {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option-btn {
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border: 2px solid #ff0080;
+            color: #ffffff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .option-btn:hover {
+            background: linear-gradient(45deg, #ff0080, #ff4081);
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
+            transform: scale(1.02);
+        }
+        
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .option-btn.selected {
+            background: linear-gradient(45deg, #00ff41, #00e676);
+            color: #000000;
+            border-color: #00ff41;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.7);
+        }
+        
+        .option-btn.correct {
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+            border-color: #4caf50;
+            animation: correctAnswer 0.6s ease;
+        }
+        
+        .option-btn.wrong {
+            background: linear-gradient(45deg, #f44336, #ef5350);
+            border-color: #f44336;
+            animation: wrongAnswer 0.6s ease;
+        }
+        
+        @keyframes correctAnswer {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes wrongAnswer {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .timer-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .timer-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00ff41, #00e676);
+            border-radius: 10px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
+        }
+        
+        .timer-text {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: #00ff41;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: linear-gradient(45deg, #ff0080, #ff4081);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 128, 0.4);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 128, 0.6);
+        }
+        
+        .start-screen, .end-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #00ff41, #00e676);
+            border: none;
+            color: #000000;
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 255, 65, 0.4);
+            margin: 20px 0;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 255, 65, 0.6);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #ff0080, #00ffff);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            .game-header {
+                margin: 10px 0;
+                padding: 15px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .question-container {
+                padding: 15px;
+            }
+            
+            .option-btn {
+                padding: 12px 15px;
+                font-size: clamp(0.85rem, 2vw, 1rem);
+            }
+        }
+        
+        /* Sound indicator */
+        .sound-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff41;
+            padding: 10px;
+            border-radius: 50%;
+            border: 2px solid #00ff41;
+            z-index: 1000;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .game-time-display {
+            background: rgba(255, 0, 128, 0.2);
+            border: 2px solid #ff0080;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .time-warning {
+            animation: timeWarning 1s infinite;
+        }
+
+        @keyframes timeWarning {
+            0%, 100% { background: rgba(255, 0, 128, 0.2); }
+            50% { background: rgba(255, 0, 128, 0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div class="sound-indicator" onclick="toggleSound()" id="soundToggle">🔊</div>
+    
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="startScreen" class="start-screen">
+            <div class="game-header">
+                <h1 class="game-title">🎮 RETRO QUIZ CHALLENGE</h1>
+                <p class="subtitle">CLASSIC '80s EDITION</p>
+                <p class="subtitle">📚 ภาษาไทย SPECIAL</p>
+                <p style="color: #ffff00; font-size: 1.1rem; margin-top: 15px;">
+                    🕹️ 25 คำถาม | 50 คะแนน | ⏰ 10 นาที | ❤️ 3 ชีวิต
+                </p>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.7); padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid #00ffff;">
+                <h3 style="color: #00ffff; margin-bottom: 15px;"> วิธีเล่น:</h3>
+                <ul style="text-align: left; color: #ffffff; line-height: 1.8; padding-left: 20px;">
+    			<li> ✅ เลือกคำตอบที่ถูกต้องภายใน 10 นาที</li>
+    			<li> ⏰ ไม่มีการหยุดเกม - เวลาจะไม่หยุดนับ</li>
+    			<li> ❤️ มี 3 ชีวิต หากตอบผิดชีวิตจะลดลง หากชีวิตหมดเกมจะจบลง</li>
+    			<li> 🏆 คะแนนเต็ม: 50 คะแนน (2 คะแนนต่อข้อ)</li>
+    			<li> 🎯 เป้าหมาย: ตอบให้ได้มากที่สุดภายในเวลาและจำนวนชีวิตที่กำหนด!</li>
+		</ul>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">
+                🚀 START GAME
+            </button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="gameScreen" class="hidden">
+            <div class="game-header">
+                <h1 class="game-title">🎮 QUIZ MASTER</h1>
+            </div>
+            
+            <div class="game-time-display" id="gameTimeDisplay">
+                <div class="timer-text">⏰ เวลาทั้งหมด: <span id="gameTimeLeft">10:00</span></div>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="gameTimerFill" style="width: 100%;"></div>
+                </div>
+            </div>
+            
+            <div class="stats-bar">
+                <div class="stat-item">📊 คะแนน: <span id="score">0</span>/50</div>
+                <div class="stat-item">📝 ข้อ: <span id="currentQ">1</span>/25</div>
+                <div class="stat-item">
+                     ชีวิต : 
+                    <span id="livesContainer" class="lives-container">
+                        <span class="life-icon">❤️</span>
+                        <span class="life-icon">❤️</span>
+                        <span class="life-icon">❤️</span>
+                    </span>
+                </div>
+                <div class="stat-item">✅ ถูก: <span id="correctCount">0</span></div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 4%;"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-header" id="questionHeader">
+                    📚 คำถามที่ 1
+                </div>
+                <div class="question-text" id="questionText">
+                    กำลังโหลดคำถาม...
+                </div>
+                <div class="options-container" id="optionsContainer">
+                    <!-- Options will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="control-buttons">
+                <!-- Removed restart button during gameplay as per original logic,
+                     it's better suited for end screen. If needed, can be added back. -->
+            </div>
+        </div>
+        
+        <!-- End Screen -->
+        <div id="endScreen" class="end-screen hidden">
+            <div class="game-header">
+                <h1 class="game-title">🎉 GAME OVER</h1>
+                <div id="finalResult"></div>
+            </div>
+            
+            <div id="scoreBreakdown" style="background: rgba(0,0,0,0.7); padding: 20px; border-radius: 15px; margin: 20px 0;">
+                <!-- Score details will be inserted here -->
+            </div>
+            
+            <button class="start-btn" onclick="restartGame()">
+                🔄 เล่นอีกครั้ง
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game Data - คำถามใหม่ทั้งหมด 25 ข้อ
+        const questions = [
+            { question: "อะไรที่ไม่ใช่ลักษณะเด่นของลายสือไทย", options: ["พยัญชนะและสระถูกจัดให้อยู่ในบรรทัดเดียวกัน", "ไม่มีเครื่องหมายวรรคตอน", "ใช้วรรณยุกต์เพียงสองรูป", "สามารถใช้นฤคหิตแทนเสียง ม ได้"], correct: 0 },
+            { question: "ข้อความใดในศิลาจารึกที่บ่งบอกว่าไม่ได้ถูกเขียนโดยพ่อขุนรามคำแหงโดยตรง?", options: ["พ่อกูจึงตั้งชื่อกูว่า พระรามคำแหง", "พี่เผือกที่เป็นพี่คนโตตายตั้งแต่เรายังเด็ก", "ในสมัยพ่อขุนรามคำแหง เมืองสุโขทัยนี้มีความอุดมสมบูรณ์มาก", "ขุนสามชนยกทัพมาที่หัวขวา"], correct: 2 },
+            { question: "ข้อใดแสดงถึงความกตัญญูที่พ่อขุนรามคำแหงมีต่อพ่อแม่?", options: ["พ่อกูตายแล้วพี่กู กูดูแลพี่", "พ่อกูชื่อศรีอินทราทิตย์ แม่กูชื่อนางเสือง", "กูพุ่งช้างขุนสามชน ชื่อมาสเมืองจนแพ้", "สมัยพ่อกู กูปรนนิบัติพ่อและแม่"], correct: 3 },
+            { question: "เรื่องใดที่ไม่ได้มีการกล่าวถึงในศิลาจารึกหลักที่ 1", options: ["ความเจริญรุ่งเรืองของเมืองสุโขทัย", "การสร้างตำราเรียนภาษาไทยเล่มแรก", "กฎหมายเกี่ยวกับการสืบทอดมรดก", "การขอความเป็นธรรมจากกษัตริย์โดยการสั่นกระดิ่ง"], correct: 1 },
+            { question: "ข้อความ 'เบื้องตีนนอนเมืองสุโขทัยนี้มีตลาดปสาน' คำว่า 'เบื้องตีนนอน' หมายถึงทิศใด", options: ["เหนือ", "ใต้", "ตะวันออก", "ตะวันตก"], correct: 0 },
+            { question: "ข้อใดไม่ใช่คุณค่าด้านวรรณศิลป์ของศิลาจารึกหลักที่ 1", options: ["ใช้ประโยคที่เรียบง่าย", "ใช้ภาษาที่มีจังหวะ", "ใช้คำสัมผัสคล้องจอง", "ใช้คำยาวที่เข้าใจยากและซับซ้อน"], correct: 3 },
+            { question: "ประโยคใดต่อไปนี้เป็นประโยคสามัญที่มีหลายกริยาวลี", options: ["ปู่กับย่าทำนาบนภูเขา", "เขาอ่านหนังสือจนทำให้ปวดหัว", "ฉันมองดูเขาที่กำลังเล่นฟุตบอล", "ปิ่นลูบหัวหมาอย่างเบา ๆ"], correct: 0 },
+            { question: "ข้อใดต่อไปนี้คือประโยครวม", options: ["กัตบอกเพื่อนว่าคงจะยังไม่ไป", "ใครกันนะที่ทำกับเขาได้", "ภูผาชอบชาบูแต่แพรวชอบไก่ทอด", "คนที่ยืนอยู่หน้าบ้านคือคนรักของฉัน"], correct: 2 },
+            { question: "ประโยคซ้อนที่มีนามานุประโยคคือข้อใด", options: ["เขาได้ยินมาว่าปีนี้ฝนจะตกหนัก", "ถ้าเธอตั้งใจทำงานจริง เธอก็จะประสบความสำเร็จ", "พี่สาวจะกลับบ้านเมื่อมหาวิทยาลัยปิดเทอม", "นักเรียนเป็นลมเพราะไม่ได้ทานอาหารเช้า"], correct: 0 },
+            { question: "คำว่า 'มุขยประโยค' หมายถึงอะไร", options: ["ประโยคที่มีประโยคหลัก", "ประโยคที่มีประโยคย่อย", "ประโยคที่ทำหน้าที่ขยายคำนาม", "ประโยคที่ขึ้นต้นด้วยคำเชื่อมและทำหน้าที่คล้ายนามวลี"], correct: 0 },
+            { question: "ข้อใดมีคำไทยแท้ทุกคำ", options: ["ความรู้เพิ่มพลังงาน การอ่านเพิ่มกำลังปัญญา", "น้ำมันขาดแคลน คุยกับแฟนก็ต้องปิดไฟ", "รักบ้านต้องสร้างรั้ว รักครอบครัวต้องสร้างความรัก", "ภาษาแสดงความเป็นชาติ เอกราชแสดงความเป็นไทย"], correct: 2 },
+            { question: "คำใดต่อไปนี้มาจากภาษาบาลี", options: ["อัจฉริยะ", "จักษุ", "ขรรค์", "อาทิตย์"], correct: 0 },
+            { question: "ข้อใดมีคำที่มาจากภาษาบาลีทั้งหมด", options: ["ทุกข์, สตรี, วิญญาณ", "อัคคี, พุทธ, แพทย์", "สัจจะ, ครุฑ, ปฏิเสธ", "ศีล, บุปผา, ฤดู"], correct: 0 },
+            { question: "ข้อใดไม่ใช่คำที่มาจากภาษาชวา-มลายู", options: ["บุหงา", "บรรยากาศ", "โสร่ง", "สะตอ"], correct: 1 },
+            { question: "คำในข้อใดมาจากภาษาเขมรทั้งหมด", options: ["จรรยา, บันดาล", "กรีฑา, ปัญญา", "บำเพ็ญ, ผสาน", "เผชิญ, ปฏิญญา"], correct: 2 },
+            { question: "ข้อใดเป็นคำยืมจากภาษาญี่ปุ่น", options: ["จักรวาล, เกาเหลา", "คลอรีน, เครดิต", "เต้าหู้, นาฬิกา", "ปิ่นโต, อะนิเมะ"], correct: 3 },
+            { question: "คำยืมจากภาษาญี่ปุ่นข้อใดที่เขียนไม่ถูกต้อง?", options: ["คาราเต้", "กิโมโน", "สุกี้ยากี", "คูโรบูตะ"], correct: 2 },
+            { question: "คำในข้อใดต่อไปนี้มาจากภาษาสันสกฤตทั้งหมด ยกเว้นข้อใด?", options: ["ครุฑ", "ปัญญา", "ปฏิทิน", "ฤดูกาล"], correct: 0 },
+            { question: "ข้อใดมีคำยืมจากภาษาอังกฤษทั้งหมด", options: ["ฟุตบอล, ศิวิไลซ์, สุกี้", "เค้ก, คอมพิวเตอร์, พริก, สเต๊ก", "กาแฟ, บาสเกตบอล, กัปตัน, ออฟฟิศ", "ลอตเตอรี่, กิโลกรัม, บาสเกตบอล, แสตมป์"], correct: 2 },
+            { question: "คำว่า 'วิศวกร' เป็นการยืมคำจากภาษาอังกฤษในลักษณะใด", options: ["ทับศัพท์", "บัญญัติศัพท์", "คำซ้อน", "คำประสม"], correct: 1 },
+            { question: "คำว่า 'โปรโมชั่น' (Promotion) เขียนสะกดได้ถูกต้องหรือไม่", options: ["ถูกต้อง", "ต้องเขียนว่า 'โปรโมชัน'", "ต้องเขียนว่า 'โปรโมทชั่น'", "ต้องเขียนว่า 'โปรโมทชัน'"], correct: 1 },
+            { question: "ใครคือผู้ที่นำกลอนดอกสร้อยรำพึงในป่าช้ามาแต่งใหม่", options: ["ทอมัส เกรย์", "เสถียรโกเศศ", "พระยาอุปกิตศิลปสาร", "นาคะประทีป"], correct: 2 },
+            { question: "คุณค่าด้านเนื้อหาที่สำคัญของกลอนดอกสร้อยรำพึงในป่าช้าคืออะไร", options: ["เน้นถึงความสำคัญของชีวิต", "แสดงให้เห็นถึงความจริงของชีวิต", "เน้นถึงคุณค่าของชีวิต", "แสดงถึงความเป็นไปของชีวิต"], correct: 1 },
+            { question: "พระยาอุปกิตศิลปสารปรับเปลี่ยนต้นไอวี่ (IVY) ในบทประพันธ์ให้เป็นอะไรเพื่อให้เข้ากับความเป็นไทย", options: ["ต้นพุทรา", "เถาวัลย์", "ต้นไทร", "ต้นพวงชมพู"], correct: 1 },
+            { question: "'ยามเอ๋ยยามนี้ ปถพีมืดมัวทั่วสถาน' คำว่า 'ปถพี' มีความหมายเดียวกันกับคำใด?", options: ["ธานินทร์", "บุรินทร์", "พรหมมินทร์", "พสุธา"], correct: 3 }
+        ];
+        
+        // Game State
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let lives = 3; // Initial lives
+        let selectedAnswer = null;
+        let soundEnabled = true;
+        let gameStartTime = null;
+        let gameTimer = null;
+        const totalGameTime = 10 * 60; // 10 minutes in seconds
+        let gameTimeLeft = totalGameTime;
+        
+        // Sound Effects
+        function playSound(type) {
+            if (!soundEnabled) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let frequency, duration;
+            
+            switch(type) {
+                case 'correct':
+                    frequency = 800;
+                    duration = 0.3;
+                    break;
+                case 'wrong':
+                    frequency = 200;
+                    duration = 0.5;
+                    break;
+                case 'tick':
+                    frequency = 1000;
+                    duration = 0.1;
+                    break;
+                case 'start':
+                    frequency = 400;
+                    duration = 0.2;
+                    break;
+                case 'gameOver':
+                    frequency = 150;
+                    duration = 1;
+                    break;
+                case 'warning':
+                    frequency = 600;
+                    duration = 0.2;
+                    break;
+                case 'lifeLost': // New sound for losing a life
+                    frequency = 250;
+                    duration = 0.4;
+                    break;
+            }
+            
+            // Check if audioContext is null or closed, re-create if necessary
+            if (!audioContext || audioContext.state === 'closed') {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+        }
+        
+        function startGame() {
+            playSound('start');
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            // Reset game state
+            currentQuestionIndex = 0;
+            score = 0;
+            correctAnswers = 0;
+            lives = 3; // Reset lives
+            gameTimeLeft = totalGameTime;
+            gameStartTime = Date.now();
+            
+            updateStats();
+            updateLivesDisplay(); // Initialize lives display
+            showQuestion();
+            startGameTimer();
+        }
+        
+        function startGameTimer() {
+            gameTimer = setInterval(() => {
+                gameTimeLeft--;
+                updateGameTimer();
+                
+                // Warning sounds
+                if (gameTimeLeft === 60) { // 1 minute left
+                    playSound('warning');
+                } else if (gameTimeLeft === 30) { // 30 seconds left
+                    playSound('warning');
+                } else if (gameTimeLeft <= 10 && gameTimeLeft > 0) { // Last 10 seconds
+                    // Removed tick sound for every second to avoid being too noisy
+                    // if (gameTimeLeft % 2 === 0) playSound('tick');
+                }
+                
+                if (gameTimeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    endGame('timeUp');
+                }
+            }, 1000);
+        }
+        
+        function updateGameTimer() {
+            const minutes = Math.floor(gameTimeLeft / 60);
+            const seconds = gameTimeLeft % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('gameTimeLeft').textContent = timeString;
+            
+            // Update timer bar
+            const percentage = (gameTimeLeft / totalGameTime) * 100;
+            document.getElementById('gameTimerFill').style.width = percentage + '%';
+            
+            // Change colors based on time left
+            const timerDisplay = document.getElementById('gameTimeDisplay');
+            const timerFill = document.getElementById('gameTimerFill');
+            
+            if (gameTimeLeft <= 60) { // Last minute - red
+                timerDisplay.classList.add('time-warning');
+                timerFill.style.background = 'linear-gradient(45deg, #ff0080, #ff4081)';
+            } else if (gameTimeLeft <= 300) { // Last 5 minutes - yellow to orange
+                timerDisplay.classList.remove('time-warning'); // Ensure it's removed if time increased
+                timerFill.style.background = 'linear-gradient(45deg, #ffff00, #ffc107)';
+            } else {
+                timerDisplay.classList.remove('time-warning');
+                timerFill.style.background = 'linear-gradient(45deg, #00ff41, #00e676)';
+            }
+        }
+
+        function updateLivesDisplay() {
+            const livesContainer = document.getElementById('livesContainer');
+            livesContainer.innerHTML = ''; // Clear existing icons
+            for (let i = 0; i < 3; i++) { // Always show 3 slots for lives
+                const span = document.createElement('span');
+                span.classList.add('life-icon');
+                if (i < lives) {
+                    span.textContent = '💖'; // Heart for remaining lives
+                } else {
+                    span.textContent = '💀'; // Skull for lost lives
+                }
+                livesContainer.appendChild(span);
+            }
+        }
+        
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame('completed');
+                return;
+            }
+            
+            const question = questions[currentQuestionIndex];
+            
+            // Update UI
+            document.getElementById('questionHeader').textContent = `📚 คำถามที่ ${currentQuestionIndex + 1}`;
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / questions.length) * 100; // Progress based on answered questions
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Clear previous options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            // Create option buttons
+            question.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = `${index + 1}. ${option}`;
+                btn.onclick = () => selectAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+            
+            selectedAnswer = null; // Reset selected answer for new question
+        }
+        
+        function selectAnswer(answerIndex, buttonElement) {
+            if (selectedAnswer !== null) return; // Already answered
+            
+            selectedAnswer = answerIndex;
+            
+            // Mark selected answer
+            buttonElement.classList.add('selected');
+            
+            // Check if correct
+            const question = questions[currentQuestionIndex];
+            const isCorrect = answerIndex === question.correct;
+            
+            setTimeout(() => {
+                // Show correct answer
+                const optionBtns = document.querySelectorAll('.option-btn');
+                optionBtns.forEach((btn, index) => {
+                    if (index === question.correct) {
+                        btn.classList.add('correct');
+                    } else if (index === answerIndex && !isCorrect) {
+                        btn.classList.add('wrong');
+                    }
+                });
+                
+                if (isCorrect) {
+                    playSound('correct');
+                    correctAnswers++;
+                    score += 2; // 2 points per correct answer
+                } else {
+                    playSound('wrong');
+                    lives--; // Lose a life for wrong answer
+                    playSound('lifeLost'); // Play life lost sound
+                    updateLivesDisplay(); // Update lives display
+                    if (lives <= 0) {
+                        // Game Over due to no lives left
+                        setTimeout(() => endGame('noLives'), 1000); // 1 second delay
+                        return; // Prevent showing next question
+                    }
+                }
+                
+                updateStats();
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    showQuestion();
+                }, 1500); // Shorter delay if no lives are lost
+                
+            }, 500);
+        }
+        
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('correctCount').textContent = correctAnswers;
+        }
+        
+        function restartGame() {
+            // Clear timer
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+            
+            // Reset to start screen
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            // Remove time-warning class for clean reset
+            document.getElementById('gameTimeDisplay').classList.remove('time-warning');
+        }
+        
+        function endGame(reason) {
+            playSound('gameOver');
+            
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            document.getElementById('gameTimeDisplay').classList.remove('time-warning'); // Reset visual
+            
+            // Calculate final results
+            const totalQuestionsAnswered = currentQuestionIndex; // Questions attempted before ending
+            const wrongAnswers = totalQuestionsAnswered - correctAnswers;
+            const percentage = ((score / (questions.length * 2)) * 100).toFixed(1); // Max score is 50
+            const timeUsed = totalGameTime - gameTimeLeft;
+            const timeUsedMinutes = Math.floor(timeUsed / 60);
+            const timeUsedSeconds = timeUsed % 60;
+            
+            // Calculate final grade
+            let grade, message, color, resultIcon;
+
+            if (lives > 0 && (reason === 'completed' || reason === 'timeUp') && score > 0) { // Winning conditions with lives remaining
+                if (percentage >= 90) {
+                    grade = "🥇 PERFECT SCHOLAR";
+                    message = "ยอดเยี่ยม! คุณเป็นอัจฉริยะด้านภาษาไทย!";
+                    color = "#FFD700";
+                } else if (percentage >= 80) {
+                    grade = "🥈 THAI MASTER";
+                    message = "เก่งมาก! คุณมีความรู้ภาษาไทยระดับสูง!";
+                    color = "#C0C0C0";
+                } else if (percentage >= 70) {
+                    grade = "🥉 LANGUAGE LOVER";
+                    message = "ดีมาก! คุณมีพื้นฐานภาษาไทยที่ดี!";
+                    color = "#CD7F32";
+                } else if (percentage >= 60) {
+                    grade = "📖 GOOD STUDENT";
+                    message = "ดีแล้ว! ศึกษาเพิ่มเติมอีกนิดนะ!";
+                    color = "#4CAF50";
+                } else { // Even if low score, if lives > 0 and not 'noLives'
+                    grade = "🤔 KEEP PRACTICING";
+                    message = "ยังไงก็ดีที่มีชีวิตเหลือ! ลองดูอีกครั้งนะ!";
+                    color = "#00FFFF";
+                }
+                 // If win/survived, show full hearts
+                 resultIcon = `<div class="lives-container" style="justify-content: center; margin-top: 15px;">
+                                <span class="life-icon" style="color:#ff69b4;">💖</span>
+                                <span class="life-icon" style="color:#ff69b4;">💖</span>
+                                <span class="life-icon" style="color:#ff69b4;">💖</span>
+                            </div>`;
+            } else { // Losing conditions (lives = 0 or very low score)
+                grade = "💀 GAME OVER";
+                message = "คุณไม่ผ่านความท้าทายนี้! ลองอีกครั้งนะ!";
+                color = "#FF6B6B";
+                // If lose, show skulls for lost lives, or all skulls
+                resultIcon = `<div class="lives-container" style="justify-content: center; margin-top: 15px;">
+                                <span class="life-icon" style="color:#ff0000;">💀</span>
+                                <span class="life-icon" style="color:#ff0000;">💀</span>
+                                <span class="life-icon" style="color:#ff0000;">💀</span>
+                            </div>`;
+            }
+
+            let endReasonText = "";
+            if (reason === 'timeUp') {
+                endReasonText = "⏰ หมดเวลา!";
+            } else if (reason === 'completed') {
+                endReasonText = "🎉 ทำครบทุกข้อ!";
+            } else if (reason === 'noLives') {
+                endReasonText = "💔 ชีวิตหมด!";
+            }
+            
+            document.getElementById('finalResult').innerHTML = `
+                <h2 style="color: ${color}; font-size: 2rem; margin: 20px 0;">${grade}</h2>
+                <p style="color: #ff0080; font-size: 1.1rem; margin-bottom: 10px;">${endReasonText}</p>
+                <p style="color: #ffffff; font-size: 1.2rem; margin-bottom: 20px;">${message}</p>
+                <div style="font-size: 3rem; color: #00ff41; text-shadow: 0 0 20px #00ff41;">
+                    ${score}/${questions.length * 2}
+                </div>
+                <div style="font-size: 1.2rem; color: #00ffff; margin-top: 10px;">
+                    ${percentage}%
+                </div>
+                ${resultIcon}
+            `;
+            
+            document.getElementById('scoreBreakdown').innerHTML = `
+                <h3 style="color: #00ffff; margin-bottom: 15px;">📊 สถิติการเล่น</h3>
+                <div style="display: grid; gap: 10px; color: #ffffff;">
+                    <div>📝 ข้อที่ทำ: ${totalQuestionsAnswered}/${questions.length} ข้อ</div>
+                    <div>✅ ตอบถูก: ${correctAnswers} ข้อ</div>
+                    <div>❌ ตอบผิด: ${wrongAnswers} ข้อ</div>
+                    <div>💔 ชีวิตเหลือ: ${lives} ชีวิต</div>
+                    <div>💰 คะแนนรวม: ${score}/${questions.length * 2} คะแนน</div>
+                    <div>🎯 เปอร์เซ็นต์: ${percentage}%</div>
+                    <div>⏰ ใช้เวลา: ${timeUsedMinutes}:${timeUsedSeconds.toString().padStart(2, '0')} นาที</div>
+                    <div>⚡ เฉลี่ย: ${totalQuestionsAnswered > 0 ? (timeUsed / totalQuestionsAnswered).toFixed(1) : 0} วินาที/ข้อ</div>
+                </div>
+            `;
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('gameScreen').classList.contains('hidden')) return;
+            
+            if (e.key >= '1' && e.key <= '4') {
+                const index = parseInt(e.key) - 1;
+                const optionBtns = document.querySelectorAll('.option-btn');
+                if (optionBtns[index] && selectedAnswer === null) {
+                    selectAnswer(index, optionBtns[index]);
+                }
+            }
+        });
+        
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('startScreen').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
